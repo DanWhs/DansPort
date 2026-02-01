@@ -1,0 +1,31 @@
+TERMS AND CONDITIONS OF USE AND PROPRIETARY RIGHTS LICENSE
+Copyright (c) 2026 Daniele. All rights reserved.
+
+PROPRIETARY NOTICE
+This software, including but not limited to its source code, design elements, animations, 3D configurations (Spline scenes), CSS architectures, and graphical user interface (GUI) patterns, is the exclusive intellectual property of Daniele.
+
+RESTRICTIONS ON USE
+You are hereby granted a limited, non-exclusive, non-transferable license to VIEW the source code for educational or portfolio-evaluation purposes only.
+
+You are STRICTLY PROHIBITED from:
+
+Copying, reproducing, or duplicating any part of the code or design.
+
+Distributing, publishing, or displaying the code in any public or private forum without explicit written consent.
+
+Using the code or design patterns for commercial or personal projects.
+
+Modifying, decompiling, or reverse-engineering the 3D integration logic or UI components.
+
+Creating derivative works based on the unique "digital artisan" aesthetic or procedural blur implementations found herein.
+
+INTELLECTUAL PROPERTY
+The "daniele." brand, the specific layout of the "performance mode" toggle, and the custom fluid cursor implementation are protected under international copyright and intellectual property laws. Any unauthorized mirroring or "cloning" of this repository will be considered a direct violation of these laws.
+
+NO WARRANTY
+This software is provided "as is," for viewing purposes only. The author shall not be held liable for any damages arising from the use or inability to use this software.
+
+LEGAL ACTION
+Daniele reserves the right to pursue legal action against any individual or entity found to be in violation of these terms.
+
+By accessing this repository, you acknowledge that you have read, understood, and agreed to be bound by these terms.

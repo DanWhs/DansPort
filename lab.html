@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>daniele | lab</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        :root {
+            --accent: #fff;
+            --gray: #0a0a0a;
+            --card-bg: #111;
+            --new-accent: #fff;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: #fff;
+            width: 100vw;
+            min-height: 100vh;
+            text-transform: lowercase;
+            overflow-x: hidden;
+        }
+
+        /* CURSORE SMOOTH */
+        #cursor {
+            width: 8px; height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease-out;
+            transform: translate(-50%, -50%);
+            left: -20px; top: -20px;
+        }
+
+        /* SFUMATURE PROCEDURALI AI BORDI */
+        .blur-container {
+            position: fixed;
+            left: 0; width: 100%; height: 25vh;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        .blur-container-top { top: 0; }
+        .blur-container-bottom { bottom: 0; transform: scaleY(-1); }
+        .blur-layer { position: absolute; inset: 0; }
+        .layer-1 { backdrop-filter: blur(2px); mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent); }
+        .layer-2 { backdrop-filter: blur(8px); mask-image: linear-gradient(to bottom, black 20%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent); }
+        .layer-3 { background: linear-gradient(to bottom, black 15%, transparent); }
+
+        #page-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9000;
+            pointer-events: none; opacity: 1;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* NAVIGATION */
+        .nav-container {
+            position: fixed;
+            top: 40px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 8500;
+            width: 90%; max-width: 600px;
+        }
+        .nav-pill {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { text-decoration: none; font-weight: 900; font-size: 0.9rem; color: #fff; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-link { text-decoration: none; color: #555; font-size: 0.7rem; font-weight: 600; transition: 0.3s; }
+        .nav-link:hover { color: #fff; }
+
+        /* LAB CONTENT */
+        main {
+            padding: 180px 10% 100px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .lab-header {
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 1s ease forwards;
+        }
+        .lab-header.visible { opacity: 1; transform: translateY(0); }
+
+        .lab-header h1 {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 0.9;
+        }
+
+        /* GRID MODULARE */
+        .lab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 50px;
+        }
+
+        .lab-item {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            transform: translateY(30px);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .lab-item.visible { opacity: 1; transform: translateY(0); }
+
+        /* STILE SPECIALE PER I NUOVI DROP */
+        .lab-item.is-new {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: #151515;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .lab-item.is-new .tag {
+            background: var(--new-accent);
+            color: #000;
+        }
+
+        .lab-item:hover {
+            transform: scale(0.98) translateY(-10px);
+            border-color: rgba(255,255,255,0.1);
+            background: #161616;
+        }
+
+        .lab-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        }
+
+        .lab-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: grayscale(100%) contrast(1.1);
+        }
+        .lab-item:hover .lab-img {
+            transform: scale(1.1);
+            filter: grayscale(0%) contrast(1);
+        }
+
+        .lab-text {
+            padding: 0 30px 35px;
+            margin-top: -20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .lab-item h3 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .lab-item p {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.5;
+            max-width: 90%;
+        }
+
+        .lab-item .tag {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 0.55rem;
+            font-weight: 900;
+            padding: 5px 12px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #fff;
+            z-index: 10;
+            transition: 0.3s;
+        }
+
+        /* FOOTER */
+        .footer-minimal {
+            padding: 80px 10% 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-logo { font-weight: 900; font-size: 1rem; color: #111; }
+        .copy { font-size: 0.5rem; color: #222; letter-spacing: 3px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="page-overlay"></div>
+
+    <div class="blur-container blur-container-top"><div class="blur-layer layer-1"></div><div class="blur-layer layer-2"></div><div class="blur-layer layer-3"></div></div>
+    <div class="blur-container blur-container-bottom"><div class="blur-layer layer-1"></div><div class="blur-layer layer-2"></div><div class="blur-layer layer-3"></div></div>
+
+    <header class="nav-container">
+        <nav class="nav-pill">
+            <a href="index.html" class="logo page-transition">daniele.</a>
+            <div class="nav-links">
+                <a href="about.html" class="nav-link page-transition">about</a>
+                <a href="contact.html" class="nav-link page-transition">contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="lab-header" id="header">
+            <h1>creative<br>playground.</h1>
+        </section>
+
+        <div class="lab-grid" id="projectGrid">
+            <!-- I progetti vengono ordinati e renderizzati via JS -->
+        </div>
+    </main>
+
+    <footer class="footer-minimal">
+        <div class="footer-logo">daniele.</div>
+        <div class="copy">terlizzi, it &bull; &copy; 2026</div>
+    </footer>
+
+    <script>
+        // --- DATA STRUCTURE ---
+        const projects = [
+            { 
+                title: "Coming Soon...", 
+                desc: "Don't let the fear of what you don't know keep you from discovering who you're meant to be.", 
+                tag: "2026",
+                image: "https://images.pexels.com/photos/35252461/pexels-photo-35252461.jpeg" 
+            }
+        ];
+
+        const grid = document.getElementById('projectGrid');
+        const overlay = document.getElementById('page-overlay');
+        const cursor = document.getElementById('cursor');
+
+        function renderProjects() {
+            // Logica di ordinamento: quelli con tag "NEW" salgono in cima
+            const sortedProjects = [...projects].sort((a, b) => {
+                if (a.tag === 'NEW' && b.tag !== 'NEW') return -1;
+                if (a.tag !== 'NEW' && b.tag === 'NEW') return 1;
+                return 0;
+            });
+
+            grid.innerHTML = sortedProjects.map((p, index) => {
+                const isNew = p.tag === 'NEW' ? 'is-new' : '';
+                return `
+                <div class="lab-item ${isNew}" style="transition-delay: ${index * 100}ms">
+                    <div class="tag">${p.tag}</div>
+                    <div class="lab-img-wrapper">
+                        <img src="${p.image}" class="lab-img" alt="${p.title}" onerror="this.src='https://via.placeholder.com/800x600/111/111?text=img+missing'">
+                    </div>
+                    <div class="lab-text">
+                        <h3>${p.title}</h3>
+                        <p>${p.desc}</p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Cursore Inerziale
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.15;
+            cursorY += (mouseY - cursorY) * 0.15;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+
+        window.addEventListener('load', () => {
+            renderProjects();
+            observer.observe(document.getElementById('header'));
+            document.querySelectorAll('.lab-item').forEach(item => observer.observe(item));
+            setTimeout(() => overlay.style.opacity = '0', 400);
+        });
+
+        document.addEventListener('mousedown', () => cursor.style.transform = 'translate(-50%, -50%) scale(2.5)');
+        document.addEventListener('mouseup', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)');
+
+        document.querySelectorAll('.page-transition').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = e.currentTarget.href;
+                overlay.style.opacity = '1';
+                setTimeout(() => window.location.href = target, 800);
+            });
+        });
+    </script>
+    <script src="protection.js"></script>
+</body>
+</html>

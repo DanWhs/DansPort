@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>daniele | about</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        :root {
+            --transition-speed: 0.8s;
+            --accent: #fff;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: #fff;
+            width: 100vw;
+            min-height: 100vh;
+            text-transform: lowercase;
+            line-height: 1.4;
+            overflow-x: hidden;
+        }
+
+        /* CURSORE SMOOTH - Inerziale e mix-blend */
+        #cursor {
+            width: 8px; height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 3000;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease-out;
+            transform: translate(-50%, -50%);
+            left: -20px;
+            top: -20px;
+        }
+
+        /* LAYERED PROCEDURAL BLUR - Top & Bottom */
+        .blur-container {
+            position: fixed;
+            left: 0; width: 100%; height: 20vh;
+            z-index: 1000;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .blur-container-top { top: 0; }
+        .blur-container-bottom { bottom: 0; flex-direction: column-reverse; }
+
+        /* I 5 livelli di sfocatura procedurale */
+        .blur-layer { position: absolute; inset: 0; }
+        .layer-1 { backdrop-filter: blur(2px); mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent); }
+        .layer-2 { backdrop-filter: blur(4px); mask-image: linear-gradient(to bottom, black 20%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent); }
+        .layer-3 { backdrop-filter: blur(8px); mask-image: linear-gradient(to bottom, black 40%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent); }
+        .layer-4 { backdrop-filter: blur(16px); mask-image: linear-gradient(to bottom, black 60%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent); }
+        .layer-5 { background: linear-gradient(to bottom, black 10%, transparent); }
+
+        .blur-container-bottom .layer-1 { mask-image: linear-gradient(to top, black, transparent); -webkit-mask-image: linear-gradient(to top, black, transparent); }
+        .blur-container-bottom .layer-2 { mask-image: linear-gradient(to top, black 20%, transparent); -webkit-mask-image: linear-gradient(to top, black 20%, transparent); }
+        .blur-container-bottom .layer-3 { mask-image: linear-gradient(to top, black 40%, transparent); -webkit-mask-image: linear-gradient(to top, black 40%, transparent); }
+        .blur-container-bottom .layer-4 { mask-image: linear-gradient(to top, black 60%, transparent); -webkit-mask-image: linear-gradient(to top, black 60%, transparent); }
+        .blur-container-bottom .layer-5 { background: linear-gradient(to top, black 10%, transparent); }
+
+        #page-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 2000;
+            pointer-events: none; opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        /* NAVBAR PILL */
+        .nav-container {
+            position: fixed;
+            top: 40px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 1100;
+            width: 90%; max-width: 600px;
+        }
+        .nav-pill {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { text-decoration: none; font-weight: 900; font-size: 0.9rem; color: #fff; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-link {
+            text-decoration: none; color: #555;
+            font-size: 0.7rem; font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-link:hover { color: #fff; }
+
+        /* HERO */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%;
+        }
+        .big-title {
+            font-size: clamp(3.5rem, 15vw, 10rem);
+            font-weight: 900;
+            letter-spacing: -6px;
+            line-height: 0.9;
+            margin-bottom: 20px;
+        }
+        .hero-sub {
+            font-size: 0.8rem;
+            color: #444;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* SECTIONS */
+        main { padding: 0 10%; max-width: 1200px; margin: 0 auto; }
+        
+        .section {
+            margin-bottom: 200px;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: 1s ease-out;
+        }
+        .section.visible { opacity: 1; transform: translateY(0); }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        .content-grid p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: #888;
+            max-width: 450px;
+        }
+        .section-label {
+            font-size: 0.6rem;
+            color: #333;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* INTERACTIVE LIST */
+        .vibes-list { list-style: none; }
+        .vibe-item {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #111;
+            letter-spacing: -2px;
+            transition: 0.4s;
+            display: block;
+            line-height: 1.1;
+        }
+        .vibe-item:hover {
+            color: #fff;
+            transform: skewX(-10deg) translateX(20px);
+        }
+
+        /* STACK CARDS */
+        .stack-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .stack-card {
+            padding: 20px;
+            background: #080808;
+            border: 1px solid #111;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-align: center;
+            color: #444;
+            transition: 0.3s;
+        }
+        .stack-card:hover {
+            background: #fff;
+            color: #000;
+            transform: translateY(-5px);
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 100px 10% 150px;
+            text-align: center;
+            border-top: 1px solid #111;
+        }
+        .footer-logo { font-weight: 900; font-size: 1.5rem; margin-bottom: 40px; color: #111; transition: 0.5s; }
+        footer:hover .footer-logo { color: #fff; }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .f-link {
+            text-decoration: none;
+            font-size: 0.7rem;
+            color: #444;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .f-link:hover { color: #fff; }
+        .copy { font-size: 0.5rem; color: #222; letter-spacing: 2px; }
+
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .big-title { letter-spacing: -2px; }
+            .vibe-item { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="page-overlay"></div>
+
+    <!-- Procedural Blur Containers -->
+    <div class="blur-container blur-container-top">
+        <div class="blur-layer layer-1"></div>
+        <div class="blur-layer layer-2"></div>
+        <div class="blur-layer layer-3"></div>
+        <div class="blur-layer layer-4"></div>
+        <div class="blur-layer layer-5"></div>
+    </div>
+
+    <div class="blur-container blur-container-bottom">
+        <div class="blur-layer layer-1"></div>
+        <div class="blur-layer layer-2"></div>
+        <div class="blur-layer layer-3"></div>
+        <div class="blur-layer layer-4"></div>
+        <div class="blur-layer layer-5"></div>
+    </div>
+
+    <header class="nav-container">
+        <nav class="nav-pill">
+            <a href="index.html" class="logo page-transition">daniele.</a>
+            <div class="nav-links">
+                <a href="lab.html" class="nav-link page-transition">lab</a>
+                <a href="contact.html" class="nav-link page-transition">contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <span class="hero-sub">digital artist</span>
+        <h1 class="big-title">about.</h1>
+    </div>
+
+    <main>
+        <section class="section">
+            <span class="section-label">01 / vision</span>
+            <div class="content-grid">
+                <p>
+                    Design is often misunderstood as a mere decorative layer, but in its purest form, it serves as the ultimate bridge between human intent and physical reality. It’s not just design, it’s a new way of perceiving functionality. When a product or a space is masterfully crafted, 
+                </p>
+                <p>
+                    it ceases to be a simple object and becomes an intuitive extension of our daily lives. True design dictates how we move, how we feel, and how we solve problems before we even realize they exist. It is the silent language of logic and beauty working in harmony to redefine the standard of excellence.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <span class="section-label">02 / vibes</span>
+            <div class="vibes-list">
+                <span class="vibe-item">music.</span>
+                <span class="vibe-item">motorsport.</span>
+                <span class="vibe-item">creative.</span>
+                <span class="vibe-item">coding.</span>
+                <span class="vibe-item">design.</span>
+            </div>
+        </section>
+
+        <section class="section">
+            <span class="section-label">03 / stack</span>
+            <div class="stack-grid">
+                <div class="stack-card">spline</div>
+                <div class="stack-card">photoshop</div>
+                <div class="stack-card">canva</div>
+                <div class="stack-card">framer</div>
+                <div class="stack-card">figma</div>
+                <div class="stack-card">blender</div> 
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-logo">daniele.</div>
+        <div class="footer-links">
+            <a href="https://www.instagram.com/_daniele.mastrorilli_/" class="f-link">instagram</a>
+            <a href="mailto:danielemastrorilli@aol.com" class="f-link">email</a>
+        </div>
+        <div class="copy">terlizzi, it &bull; &copy; 2026</div>
+    </footer>
+
+    <script>
+        const overlay = document.getElementById('page-overlay');
+        const cursor = document.getElementById('cursor');
+
+        // Smooth Cursor Logic - Inerzia migliorata
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            // Lerp per l'effetto smooth
+            cursorX += (mouseX - cursorX) * 0.12;
+            cursorY += (mouseY - cursorY) * 0.12;
+            
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(2.5)';
+            cursor.style.background = 'rgba(255,255,255,0.2)';
+        });
+        document.addEventListener('mouseup', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+            cursor.style.background = '#fff';
+        });
+
+        // Page Transitions
+        document.querySelectorAll('.page-transition').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = e.currentTarget.href;
+                overlay.style.opacity = '1';
+                setTimeout(() => window.location.href = target, 800);
+            });
+        });
+
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+        window.addEventListener('load', () => {
+            setTimeout(() => overlay.style.opacity = '0', 300);
+        });
+    </script>
+    <script src="protection.js"></script>
+</body>
+</html>

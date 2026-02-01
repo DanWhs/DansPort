@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>daniele | contact</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;900&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: #fff;
+            width: 100vw;
+            height: 100vh;
+            text-transform: lowercase;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CURSORE */
+        #cursor {
+            width: 8px; height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.2s ease-out;
+            transform: translate(-50%, -50%);
+            left: -20px; top: -20px;
+        }
+
+        /* SFUMATURE PROCEDURALI */
+        .blur-container {
+            position: fixed;
+            left: 0; width: 100%; height: 25vh;
+            z-index: 2000;
+            pointer-events: none;
+        }
+        .blur-container-top { top: 0; }
+        .blur-container-bottom { bottom: 0; transform: scaleY(-1); }
+        .blur-layer { position: absolute; inset: 0; }
+        .layer-1 { backdrop-filter: blur(2px); mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent); }
+        .layer-2 { backdrop-filter: blur(8px); mask-image: linear-gradient(to bottom, black 20%, transparent); -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent); }
+        .layer-3 { background: linear-gradient(to bottom, black 15%, transparent); }
+
+        #page-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9000;
+            pointer-events: none; opacity: 1;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* NAVIGATION - Copiata da about.html */
+        .nav-container {
+            position: fixed;
+            top: 40px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 8500;
+            width: 90%; max-width: 600px;
+        }
+        .nav-pill {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { text-decoration: none; font-weight: 900; font-size: 0.9rem; color: #fff; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-link {
+            text-decoration: none; color: #555;
+            font-size: 0.7rem; font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-link:hover { color: #fff; }
+
+        /* CANVAS AREA */
+        .pixel-canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1000;
+        }
+        canvas#pixelCanvas {
+            max-width: 100%;
+            pointer-events: none;
+        }
+
+        /* UI CONTROLS */
+        .ui-controls {
+            position: fixed;
+            top: 65%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8500; 
+            pointer-events: auto;
+        }
+        .switch-btn {
+            background: rgba(255, 255, 255, 1);
+            border: none;
+            color: #000;
+            font-family: inherit;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px 28px;
+            border-radius: 50px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .switch-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
+        }
+
+        /* LINKS */
+        .contact-list {
+            position: fixed;
+            bottom: 12vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            z-index: 8500;
+            pointer-events: auto;
+        }
+        .contact-item {
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #666;
+            letter-spacing: 2px;
+            transition: 0.4s ease;
+        }
+        .contact-item:hover { color: #fff; }
+
+        /* FOOTER */
+        .footer-minimal {
+            position: fixed;
+            bottom: 40px; left: 0; width: 100%;
+            padding: 0 10%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 8500;
+            pointer-events: none;
+        }
+        .footer-logo { font-weight: 900; font-size: 1rem; color: #111; }
+        .copy { font-size: 0.5rem; color: #222; letter-spacing: 3px; }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="page-overlay"></div>
+
+    <div class="blur-container blur-container-top"><div class="blur-layer layer-1"></div><div class="blur-layer layer-2"></div><div class="blur-layer layer-3"></div></div>
+    <div class="blur-container blur-container-bottom"><div class="blur-layer layer-1"></div><div class="blur-layer layer-2"></div><div class="blur-layer layer-3"></div></div>
+
+    <header class="nav-container">
+        <nav class="nav-pill">
+            <a href="index.html" class="logo page-transition">daniele.</a>
+            <div class="nav-links">
+                <a href="about.html" class="nav-link page-transition">about</a>
+                <a href="lab.html" class="nav-link page-transition">lab</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="pixel-canvas-container">
+        <canvas id="pixelCanvas"></canvas>
+        <div class="ui-controls">
+            <button class="switch-btn" id="switchPhrase">change vibe</button>
+        </div>
+    </div>
+
+    <div class="contact-list">
+        <a href="mailto:danielemastrorilli@aol.com" class="contact-item">email</a>
+        <a href="https://www.instagram.com/_daniele.mastrorilli_/" class="contact-item" target="_blank">instagram</a>
+    </div>
+
+    <div class="footer-minimal">
+        <div class="footer-logo">daniele.</div>
+        <div class="copy">terlizzi, it &bull; &copy; 2026</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('pixelCanvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const cursor = document.getElementById('cursor');
+        const overlay = document.getElementById('page-overlay');
+        const switchBtn = document.getElementById('switchPhrase');
+
+        let particles = [];
+        let mouse = { x: -100, y: -100, radius: 120 };
+        let mouseReal = { x: -100, y: -100 };
+        let smoothMouse = { x: -100, y: -100 };
+        let isTransitioning = false;
+
+        const phrases = [
+            "let's talk.", 
+            "hi daniele.", 
+            "say hello.", 
+            "get in touch.", 
+            "drop a line.", 
+            "let's build.", 
+            "hit me up.",
+            "work with me.",
+            "ciao."
+        ];
+        let currentPhraseIndex = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseReal.x = e.clientX;
+            mouseReal.y = e.clientY;
+        });
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.originX = x;
+                this.originY = y;
+                this.color = color;
+                this.size = 2;
+                this.vx = 0;
+                this.vy = 0;
+                this.friction = 0.88;
+                this.ease = 0.08;
+                this.randomSeed = Math.random() * 100;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+
+            update() {
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < mouse.radius && !isTransitioning) {
+                    let angle = Math.atan2(dy, dx);
+                    let jitter = Math.sin(Date.now() * 0.01 + this.randomSeed) * 5;
+                    let force = (mouse.radius - distance) / mouse.radius;
+                    
+                    this.vx -= Math.cos(angle) * force * (8 + jitter);
+                    this.vy -= Math.sin(angle) * force * (8 + jitter);
+                }
+
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+
+                this.x += this.vx + (this.originX - this.x) * this.ease;
+                this.y += this.vy + (this.originY - this.y) * this.ease;
+            }
+        }
+
+        function init(phrase) {
+            // Imposta dimensioni in base alla finestra corrente
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Verifica di sicurezza per evitare larghezza 0 durante il caricamento rapido
+            if (canvas.width <= 0 || canvas.height <= 0) return;
+
+            const fontSize = Math.min(window.innerWidth / 4.5, 140);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = `900 ${fontSize}px Montserrat`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(phrase, canvas.width / 2, canvas.height / 2);
+
+            try {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                particles = [];
+
+                const gap = 4;
+                for (let y = 0; y < canvas.height; y += gap) {
+                    for (let x = 0; x < canvas.width; x += gap) {
+                        const index = (y * canvas.width + x) * 4;
+                        const alpha = pixels[index + 3];
+                        if (alpha > 128) {
+                            particles.push(new Particle(x, y, 'white'));
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Errore durante l'acquisizione dei dati dei pixel:", e);
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            smoothMouse.x += (mouseReal.x - smoothMouse.x) * 0.15;
+            smoothMouse.y += (mouseReal.y - smoothMouse.y) * 0.15;
+            
+            cursor.style.left = smoothMouse.x + 'px';
+            cursor.style.top = smoothMouse.y + 'px';
+            
+            mouse.x = smoothMouse.x;
+            mouse.y = smoothMouse.y;
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        switchBtn.addEventListener('click', () => {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            particles.forEach(p => {
+                p.vx = (Math.random() - 0.5) * 50;
+                p.vy = (Math.random() - 0.5) * 50;
+                p.ease = 0.01;
+            });
+
+            setTimeout(() => {
+                currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+                init(phrases[currentPhraseIndex]);
+                isTransitioning = false;
+            }, 600);
+        });
+
+        window.addEventListener('resize', () => init(phrases[currentPhraseIndex]));
+        
+        // Aspettiamo che il DOM sia completamente pronto prima dell'inizializzazione
+        window.addEventListener('load', () => {
+            init(phrases[0]);
+            animate();
+            setTimeout(() => overlay.style.opacity = '0', 400);
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(2.5)';
+            if (!isTransitioning) mouse.radius = 300;
+        });
+        document.addEventListener('mouseup', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+            if (!isTransitioning) mouse.radius = 120;
+        });
+
+        document.querySelectorAll('.page-transition').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = e.currentTarget.href;
+                overlay.style.opacity = '1';
+                setTimeout(() => window.location.href = target, 800);
+            });
+        });
+    </script>
+    <script src="protection.js"></script>
+</body>
+</html>
